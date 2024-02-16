@@ -1,0 +1,57 @@
+// Define pin numbers
+const int trigPin = 2; // Ultrasonic sensor trigger pin
+const int echoPin = 3; // Ultrasonic sensor echo pin
+const int brakePin = 4; // Brake control pin
+const int ledPin = 5; // LED pin
+
+// Define thresholds
+const int obstacleThreshold = 20; // Threshold distance for LED blinking (in centimeters)
+const int brakeThreshold = 10; // Threshold distance for obstacle detection (in centimeters)
+
+void setup() {
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  pinMode(brakePin, OUTPUT);
+  pinMode(ledPin, OUTPUT);
+
+  digitalWrite(brakePin, LOW); // Initialize brake off
+}
+
+void loop() {
+  // Send ultrasonic pulse to trigger pin
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  // Measure the time it takes for the ultrasonic signal to return
+  long duration = pulseIn(echoPin, HIGH);
+
+  // Convert the time into distance (cm)
+  int obstacleDistance = duration * 0.034 / 2;
+
+  // Check if obstacle is too close
+  if (obstacleDistance < brakeThreshold) {
+    // Apply brake
+    digitalWrite(brakePin, LOW);
+    // Turn off the LED when braking
+    digitalWrite(ledPin, LOW);
+  } else {
+    // Release brake
+    digitalWrite(brakePin, HIGH);
+    // Check if obstacle is within LED blinking range
+    if (obstacleDistance <= obstacleThreshold) {
+      // Blink the LED
+      digitalWrite(ledPin, HIGH);
+      delay(500);
+      digitalWrite(ledPin, LOW);
+      delay(500);
+    } else {
+      // Turn off the LED
+      digitalWrite(ledPin, LOW);
+    }
+  }
+
+  delay(100); // Delay for stability
+}
